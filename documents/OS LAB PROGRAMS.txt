@@ -1,0 +1,1017 @@
+FCFS(UNIT 2)
+/* Assume all the processes arrive at the same time.
+FCFS CPU SCHEDULING ALGORITHM
+Read the number of processes/jobs in the system, their CPU burst times.
+The scheduling is performed on the basis of arrival time of the processes
+irrespective of their other parameters. Each process will be executed according to its arrival time. 
+Calculate the waiting time and turnaround time of each of the processes accordingly.
+        
+Hint: use this printf statements to match with the test cases:
+printf("\t PROCESS \tBURST TIME \t WAITING TIME\t TURNAROUND TIME\n"); 
+for(i=0;i<n;i++)
+printf("\n\t P%d \t\t %d \t\t %d \t\t %d", i, bt[i], wt[i], tat[i]);
+printf("\nAverage Waiting Time -- %f", wtavg/n); 
+printf("\nAverage Turnaround Time -- %f", tatavg/n); 
+        
+sample output:
+Enter the number of processes -- 4                                                                                      
+                                                                                                                                
+Enter Burst Time for Process 0 --2                                                                                      
+                                                                                                                                
+Enter Burst Time for Process 1 --5                                                                                     
+                                                                                                                                
+Enter Burst Time for Process 2 --6                                                                                    
+                                                                                                                               
+Enter Burst Time for Process 3 --8                                                                                      
+PROCESS        BURST TIME       WAITING TIME    TURNAROUND TIME                                                
+                                                                                                                                
+P0              2               0               2                                                              
+P1              5               2               7                                                              
+P2              6               7               13                                                             
+P3              8               13              21                                                             
+Average Waiting Time -- 5.500000                                                                                        
+Average Turnaround Time -- 10.750000 
+        
+       
+*/
+#include<stdio.h>
+double avg(int arr[],int n)
+{
+    double sum=0;
+    for(int i=0;i<n;i++)
+    {
+        sum=sum+arr[i];
+    }
+    return sum/n;
+}
+int main()
+{
+    int n;
+    printf("Enter the number of processes -- ");
+    scanf("%d",&n);
+    printf("\n");
+    int arrival[]={0,0,0,0};
+    int burst[n];
+    for(int i=0;i<n;i++)
+    {
+        printf("Enter Burst Time for Process %d --",i);
+        scanf("%d",&burst[i]);
+        printf("\n");
+    }
+    int turnaroundtime[n];
+    int sum=0;
+    for(int i=0;i<n;i++)
+    {
+        sum=sum+burst[i];
+        turnaroundtime[i]=sum;
+    }
+    int waitingtime[n];
+    for(int i=0;i<n;i++)
+    {
+        waitingtime[i]=turnaroundtime[i]-burst[i];
+    }
+    printf("PROCESS \t BURST TIME \t WAITING TIME \t TURNAROUND TIME \n");
+    for(int i=0;i<n;i++)
+    {
+        printf("\nP%d \t\t %d \t\t %d \t\t %d",i,burst[i],waitingtime[i],turnaroundtime[i]);
+    }
+    printf("\n");
+    printf("Average Waiting Time -- %f",avg(waitingtime,n));
+    printf("\n");
+    printf("Average Turnaround Time -- %f",avg(turnaroundtime,n));
+}
+
+ROUND ROBIN ALGORITHM
+/* Program for Round Robin CPU Scheduling With Waiting Time 
+     /* IMPLEMENTATION OF ROUND ROBIN SCHEDULING
+     
+     DESCRIPTION Each process gets a small unit of CPU time (time quantum), 
+     usually 10-100 milliseconds. After this time has elapsed, the process is preempted 
+    and added to the end of the ready queue. If there are n processes in the ready queue 
+     and the time quantum is q, then each process gets 1/n of the CPU time in chunks of at most 
+     q time units at once. No process waits more than (n 1)q time units. Performance q large: FIFO q small: q 
+    must be large with respect to context switch, otherwise overhead is too high.*/
+    
+    /*Sample input and output:
+    enter no of processes: 3                                                                                                
+    enter the process name: p1                                                                                              
+    enter the processing time: 6                                                                                            
+    enter the process name: p2                                                                                              
+    enter the processing time: 3                                                                                            
+    enter the process name: p3                                                                                              
+    enter the processing time: 9                                                                                            
+   enter time slice: 3                                                                                                     
+    process-name process-time waiting-time                                                                                  
+     p1             6               6                                                                                       
+     p2             3               3                                                                                       
+     p3             9               9                                                                                       
+     total waiting time = 18                                                                                                
+     average waiting time =  6.000000                                                                                   
+    */
+    
+   /* Write your program here */
+#include <stdio.h>
+void findWaitingTime(int processes[], int n, int burstTime[], int quantum, int waitingTime[], int turnaroundTime[]) {
+    int remainingTime[n];
+    for (int i = 0; i < n; i++) {
+        remainingTime[i] = burstTime[i];
+    }
+
+    int currentTime = 0;
+    while (1) {
+        int done = 1;
+        for (int i = 0; i < n; i++) {
+            if (remainingTime[i] > 0) {
+                done = 0;
+                if (remainingTime[i] > quantum) {
+                    currentTime += quantum;
+                    remainingTime[i] -= quantum;
+                } else {
+                    currentTime += remainingTime[i];
+                    waitingTime[i] = currentTime - burstTime[i];
+                    remainingTime[i] = 0;
+                    turnaroundTime[i] = currentTime;
+                }
+            }
+        }
+        if (done == 1)
+            break;
+    }
+}
+void findAverageTime(int processes[], int n, int burstTime[], int quantum) {
+    int waitingTime[n], turnaroundTime[n];
+    int totalWaitingTime = 0, totalTurnaroundTime = 0;
+
+    findWaitingTime(processes, n, burstTime, quantum, waitingTime, turnaroundTime);
+
+    printf("\nProcess   Burst Time   Waiting Time   Turnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        totalWaitingTime += waitingTime[i];
+        totalTurnaroundTime += turnaroundTime[i];
+        printf("%d         %d            %d               %d\n", i + 1, burstTime[i], waitingTime[i], turnaroundTime[i]);
+    }
+
+    float avgWaitingTime = (float)totalWaitingTime / n;
+    float avgTurnaroundTime = (float)totalTurnaroundTime / n;
+    printf("\nAverage Waiting Time: %.2f\n", avgWaitingTime);
+    printf("Average Turnaround Time: %.2f\n", avgTurnaroundTime);
+}
+
+int main() {
+    int n, quantum;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    int burstTime[n];
+    printf("\nEnter the burst time for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d", &burstTime[i]);
+    }
+
+    printf("\nEnter the time quantum: ");
+    scanf("%d", &quantum);
+
+    findAverageTime(NULL, n, burstTime, quantum);
+
+    return 0;
+}
+
+SJF ALGORITHM
+/*Write a C Program to Simulate Shortest Job First CPU Scheduling Algorithm
+ Consider Process name, arriavl time and execution time as an Input.
+ Sample Input and Output
+Enter the number of process:3                                                                                           
+Enter process name, arrival time& execution time:1                                                                      
+0                                                                                                                       
+3                                                                                                                       
+Enter process name, arrival time& execution time:2                                                                      
+1                                                                                                                       
+1                                                                                                                       
+Enter process name, arrival time& execution time:3                                                                      
+3                                                                                                                       
+5                                                                                                                       
+                                                                                                                        
+Pname   arrivaltime     executiontime   waitingtime     tatime                                                          
+2           1               1               0               1                                                           
+1           0               3               2               5                                                           
+3           3               5               2               7                                                           
+Average waiting time is:1.333333                                                                                        
+Average turnaroundtime is:4.333333 */                                                                                     
+#include<stdio.h>
+#include<string.h>
+int main()
+{
+    int et[20],at[10],n,i,j,temp,st[10],ft[10],wt[10],ta[10];
+    int totwt=0,totta=0;
+    float awt,ata;
+    char pn[10][10],t[10];
+    //clrscr();
+    printf("Enter the number of process:");
+    scanf("%d",&n);
+    for(i=0; i<n; i++)
+    {
+        printf("Enter process name, arrival time& execution time:");
+        //flushall();
+        scanf("%s%d%d",pn[i],&at[i],&et[i]);
+    }
+    for(i=0; i<n; i++)
+        for(j=0; j<n; j++)
+        {
+            if(et[i]<et[j])
+            {
+                temp=at[i];
+                at[i]=at[j];
+                at[j]=temp;
+                temp=et[i];
+                et[i]=et[j];
+                et[j]=temp;
+                strcpy(t,pn[i]);
+                strcpy(pn[i],pn[j]);
+                strcpy(pn[j],t);
+            }
+        }
+    for(i=0; i<n; i++)
+    {
+        if(i==0)
+            st[i]=at[i];
+        else
+            st[i]=ft[i-1];
+        wt[i]=st[i]-at[i];
+        ft[i]=st[i]+et[i];
+        ta[i]=ft[i]-at[i];
+        totwt+=wt[i];
+        totta+=ta[i];
+    }
+    awt=(float)totwt/n;
+    ata=(float)totta/n;
+    printf("\nPname\tarrivaltime\texecutiontime\twaitingtime\ttatime");
+    for(i=0; i<n; i++)
+        printf("\n%s\t%5d\t\t%5d\t\t%5d\t\t%5d",pn[i],at[i],et[i],wt[i],ta[i]);
+    printf("\nAverage waiting time is:%f",awt);
+    printf("\nAverage turnaroundtime is:%f",ata);
+    return 0;
+}
+
+
+PRODUCER CONSUMER
+/*
+Implement Producer &Consumer problem using semaphore.
+Producer consumer problem is also known as bounded buffer problem. In this problem we have two processes,4
+producer and consumer, who share a fixed size buffer. Producer work is to produce data or items and put 
+in buffer. Consumer work is to remove data from buffer and consume it. We have to make sure that producer 
+do not produce data when buffer is full and consumer do not remove data when buffer is empty.
+ 
+To solve this problem, we need two counting semaphores – Full and Empty. “Full” keeps track of number of 
+items in the buffer at any given time and “Empty” keeps track of number of unoccupied slots.
+Initialization of semaphores –
+mutex = 1
+Full = 0 // Initially, all slots are empty. Thus full slots are 0 
+Empty = 3 // All slots are empty initially  and Maximum Size of the buffer is 3.
+  
+  
+Give 3 choice to user
+1. producer
+2. consumer
+3. exit
+    
+    
+    
+Smaple Input and output:
+1.Producer
+2.Consumer
+3.Exit
+Enter your choice:1
+ 
+Producer produces the item 1
+Enter your choice:1
+    
+Producer produces the item 2
+Enter your choice:1
+    
+Producer produces the item 3
+Enter your choice:1
+Buffer is full!!
+Enter your choice:2
+    
+Consumer consumes item 3
+Enter your choice:2
+    
+Consumer consumes item 2
+Enter your choice:2
+    
+Consumer consumes item 1
+Enter your choice:2
+Buffer is empty!!
+Enter your choice:3
+    
+    
+*/
+
+#include <stdio.h>
+
+int main() {
+        printf("1.Producer\n");
+        printf("2.Consumer\n");
+        printf("3.Exit\n");
+        int size = 3;
+        int a = 0;
+
+    while (1) {
+        int ch;
+        printf("Enter your choice:");
+        scanf("%d", &ch);
+
+        switch (ch) {
+            case 1:
+                a++;
+                if (a <= size) {
+                    printf("\nProducer produces the item %d\n", a);
+                } else {
+                    printf("Buffer is full!!\n");
+                }
+                break;
+            case 2:
+                a--;
+                if (a > 0) {
+                    printf("\nConsumer consumes item %d\n", a);
+                } else {
+                    printf("Buffer is empty!!\n");
+                }
+                break;
+            case 3:
+                return 0;
+            default:
+                printf("Invalid choice. Please enter 1, 2, or 3.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+READER WRITER
+/* 			Implement reader writer problem
+The Problem Statement
+There is a shared resource which should be accessed by multiple processes. 
+There are two types of processes in this context. They are reader and writer. 
+Any number of readers can read from the shared resource simultaneously, but only 
+one writer can write to the shared resource. When a writer is writing data to the 
+resource, no other process can access the resource. A writer cannot write to the 
+resource if there are non zero number of readers accessing the resource at that time. 
+*/
+/*
+SAMPLE INPUT AND OUTPUT:
+    
+1. Press 1 for writer                                                                                                   
+2. Press 2 for reader                                                                                                   
+3. Press 3 for exit                                                                                                     
+Enter your choice:1                                                                                                 
+                                                                                                                            
+The writer content number:1                                                                                            
+Enter your choice:1                                                                                                   
+                                                                                                                            
+The writer content number:2                                                                                            
+Enter your choice:1                                                                                                     
+                                                                                                                            
+The writer content number:3                                                                                            
+Enter your choice:2                                                                                                     
+                                                                                                                            
+The reader content number:3                                                                                            
+Enter your choice:2                                                                                                     
+                                                                                                                            
+The reader content number:2                                                                                            
+Enter your choice:3
+*/
+    
+/* WRITE YOUR PROGRAM FROM HERE*/
+#include <stdio.h>
+
+int main() {
+        printf("1. Press 1 for writer\n");
+        printf("2. Press 2 for reader\n");
+        printf("3. Press 3 for exit\n");
+        int size = 3;
+        int a = 0;
+
+    while (1) {
+        int ch;
+        printf("Enter your choice:");
+        scanf("%d", &ch);
+
+        switch (ch) {
+            case 1:
+                a++;
+                if (a <= size) {
+                    printf("\nThe writer content number:%d\n", a);
+                }
+                break;
+            case 2:
+                if (a > 0) {
+                    printf("\nThe reader content number:%d\n", a);
+                }
+                a--;
+                break;
+            case 3:
+                return 0;
+            default:
+                printf("Invalid choice. Please enter 1, 2, or 3.\n");
+        }
+    }
+
+    return 0;
+}
+
+
+DINING PHILOSOPHER
+/*
+DINING PHILOSOPHER’S PROBLEM
+The dining-philosophers problem is considered a classic synchronization problem because it is an example of 
+a large class of concurrency-control problems. It is a simple representation of the need to allocate several
+resources among several processes in a deadlock-free and starvation-free manner. Consider five philosophers 
+who spend their lives thinking and eating. The philosophers share a circular table surrounded by five chairs,
+each belonging to one philosopher. In the center of the table is a bowl of rice, and the table is laid with 
+five single chopsticks. When a philosopher thinks, she does not interact with her colleagues. From time to time,
+a philosopher gets hungry and tries to pick up the two chopsticks that are closest to her (the chopsticks that
+are between her and her left and right neighbors). A philosopher may pick up only one chopstick at a time. 
+Obviously, she cam1ot pick up a chopstick that is already in the hand of a neighbor. When a hungry philosopher
+has both her chopsticks at the same time, she eats without releasing her chopsticks. When she is finished eating, she puts down both of her chopsticks and starts thinking again. The dining-philosophers problem may lead to a deadlock situation and hence some rules have to be framed to avoid the occurrence of deadlock.
+One simple solution is to represent each chopstick by a semaphore. A philosopher tries to grab the chopstick
+by executing a wait operation on that semaphore, and releases her chopsticks by executing the signal operation
+on the appropriate semaphores.
+
+A semaphore S is an integer variable that can be accessed only through two standard operations : wait()	and	
+signal(). The wait() operation reduces the value of semaphore by 1 and the signal() operation increases its 
+value by 1.
+
+Note: 
+1. use enum for declaring the various state of philosopher
+enum{thinking,hungry,eating} state[50]
+2. user can perform any one operation:
+pickup the chopstick
+putdown the chopstick
+check the status of the philosopher
+exit from the program
+Sample output:
+Enter the number of Philosophers: 5                                                                                                                                                                                                        
+1.Pickup()      2.Putdown()     3.Showstats()   4.Exit                                                                  
+Enter the choice : 2                                                                             
+Enter Philosopher number:   1                                                                                        
+Philosopher 1 went to thinking state                                                                                    
+1.Pickup()      2.Putdown()     3.Showstats()   4.Exit                                                                  
+Enter the choice : 3                                                                                        
+Philosopher 1 is Thinking                                                                                               
+Philosopher 2 is Thinking                                                                                               
+Philosopher 3 is Thinking                                                                                               
+Philosopher 4 is Thinking                                                                                               
+Philosopher 5 is Thinking                                                                                               
+1.Pickup()      2.Putdown()     3.Showstats()   4.Exit                                                                  
+Enter the choice :  1                                                                                                  
+Enter Philosopher number:  1                                                                                           
+Philosopher 1 eating                                                                                                    
+1.Pickup()      2.Putdown()     3.Showstats()   4.Exit                                                                  
+Enter the choice : 4
+*/
+
+#include<stdlib.h>
+#include<stdio.h>
+int a,v=1,c1[100];
+void pickup(){
+   printf("Enter Philosopher number:  ");
+   int c;
+   scanf("%d",&c);
+   printf("Philosopher %d eating \n",c);
+   c1[c]=-1;
+   printf("\n");
+   
+}
+void putdown(){
+     printf("Enter Philosopher number:  ");
+    int c;
+    scanf("%d",&c);
+    printf("Philosopher %d went to thinking state\n \n",c);
+}
+void showstats(){
+    for(int i=1;i<=a;i++){
+        if(c1[i]!=-1){
+        printf("Philosopher %d is Thinking\n",c1[i]);
+        }else{
+            printf("Philosopher %d is Eating\n",i);
+        }
+    }printf("\n");
+} 
+int main(){
+    printf("Enter the number of Philosophers: ");
+    scanf("%d",&a);
+    for(int i=1;i<=a;i++){
+        c1[i]=i;
+    }
+    while(1){
+    printf("1.Pickup()\t 2.Putdown()\t 3.Showstats()\t 4.Exit\n");
+    printf("Enter the choice : ");
+    int b;
+    scanf("%d",&b);
+    switch(b){
+        case 1:{
+            pickup();
+            break;
+        }case 2:{
+            putdown();
+            break;
+        }case 3:{
+            showstats();
+            break;
+        }case 4:{
+            exit(1);
+        }
+    }
+   }
+}
+
+
+BANKERS ALGORITHM
+/*Write Program for Deadlock Detection ( Banker’s Algorithm)
+sample output for bankers deadlock detection
+ enter number of processes and number of resources :4 5                                                                  
+enter claim matrix:                                                                                                     
+0 1 0 0 1                                                                                                               
+0 0 1 0 1                                                                                                               
+0 0 0 0 1                                                                                                               
+1 0 1 0 1                                                                                                               
+enter allocation matrix:                                                                                                
+1 0 1 1 0                                                                                                               
+1 1 0 0 0                                                                                                               
+0 0 0 1 0                                                                                                               
+0 0 0 0 0                                                                                                               
+enter resource vector:                                                                                                  
+2 1 1 2 1                                                                                                               
+enter availability vector:                                                                                              
+0 0 0 0 1                                                                                                               
+dead lock causing process are:1 2                                                                                   
+                                                                                                                    
+                                                                                                                        
+  */
+/*Write Program for Deadlock Detection ( Banker’s Algorithm)
+sample output for bankers deadlock detection
+ enter number of processes and number of resources :4 5                                                                  
+enter claim matrix:                                                                                                     
+0 1 0 0 1                                                                                                               
+0 0 1 0 1                                                                                                               
+0 0 0 0 1                                                                                                               
+1 0 1 0 1                                                                                                               
+enter allocation matrix:                                                                                                
+1 0 1 1 0                                                                                                               
+1 1 0 0 0                                                                                                               
+0 0 0 1 0                                                                                                               
+0 0 0 0 0                                                                                                               
+enter resource vector:                                                                                                  
+2 1 1 2 1                                                                                                               
+enter availability vector:                                                                                              
+0 0 0 0 1                                                                                                               
+dead lock causing process are:1 2                                                                                   
+                                                                                                                    
+                                                                                                                        
+  */
+#include<stdio.h>
+
+void main() {
+    int n, m, i, j, k;
+    printf("enter number of processes and number of resources:");
+    scanf("%d %d", &n, &m);
+    int alloc[n][m], max[n][m], avail[m], need[n][m], completed[n];
+    
+    // Input the claim matrix
+    printf("enter claim matrix:\n");
+    for(i = 0; i < n; i++)
+        for(j = 0; j < m; j++)
+            scanf("%d", &max[i][j]);
+    
+    // Input the allocation matrix
+    printf("enter allocation matrix:\n");
+    for(i = 0; i < n; i++)
+        for(j = 0; j < m; j++)
+            scanf("%d", &alloc[i][j]);
+    
+    // Input the resource vector
+    printf("enter resource vector:\n");
+    for(i = 0; i < m; i++)
+        scanf("%d", &avail[i]);
+    
+    // Input the availability vector
+    printf("enter availability vector:\n");
+    for(i = 0; i < m; i++)
+        scanf("%d", &avail[i]);
+    
+    // Initialize completed array to false
+    for(i = 0; i < n; i++)
+        completed[i] = 0;
+    
+    // Calculate the need matrix
+    for(i = 0; i < n; i++)
+        for(j = 0; j < m; j++)
+            need[i][j] = max[i][j] - alloc[i][j];
+    
+    // Main deadlock detection logic
+    int count = 0;
+    int safeSeq[n];
+    int finish;
+    while(count < n) {
+        finish = 1;
+        for(i = 0; i < n; i++) {
+            if(!completed[i]) {
+                int canFinish = 1;
+                for(j = 0; j < m; j++) {
+                    if(need[i][j] > avail[j]) {
+                        canFinish = 0;
+                        break;
+                    }
+                }
+                if(canFinish) {
+                    for(k = 0; k < m; k++)
+                        avail[k] += alloc[i][k];
+                    safeSeq[count++] = i;
+                    completed[i] = 1;
+                    finish = 0;
+                }
+            }
+        }
+        if(finish)
+            break;
+    }
+    if(count < n) {
+        printf("dead lock causing process are:");
+        for(i = 0; i < n-1; i++) {
+            if(!completed[i])
+                printf(" %d", i+1);
+        }
+        printf("\n");
+    } else {
+        printf("No deadlock detected\n");
+        printf("Safe sequence:");
+        for(i = 0; i < n; i++)
+            printf(" %d", safeSeq[i]+1);
+        printf("\n");
+    }
+}
+
+
+FCFS 
+/* FCFS: FCFS is the simplest of all the Disk Scheduling Algorithms.
+In FCFS, the requests are addressed in the order they arrive in the disk queue. 
+Let us understand this with the help of an example.
+
+Example:
+Suppose the order of request is- (82,170,43,140,24,16,190)
+And current position of Read/Write head is : 50
+
+ So, total seek time:
+=(82-50)+(170-82)+(170-43)+(140-43)+(140-24)+(24-16)+(190-16)
+=642
+
+sample input and output:
+Enter the number of Requests                                                                                            
+7                                                                                                                       
+Enter the Requests sequence                                                                                             
+82                                                                                                                      
+170                                                                                                                     
+43                                                                                                                      
+140                                                                                                                     
+24                                                                                                                      
+16                                                                                                                      
+190                                                                                                                     
+Enter initial head position                                                                                             
+50                                                                                                                      
+Total head moment is 642     */                                                                                           
+                         
+#include<stdio.h>
+#include<stdlib.h>
+
+int main() {
+    int n, head, total_seek_time = 0;
+
+    printf("Enter the number of requests\n");
+    scanf("%d", &n);
+
+    int requests[n];
+
+    printf("Enter the requests sequence \n");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter initial head position \n");
+    scanf("%d", &head);
+
+    // FCFS algorithm
+    for(int i = 0; i < n; i++) {
+        total_seek_time += abs(requests[i] - head);
+        head = requests[i];
+    }
+
+    printf("Total head movement is %d\n", total_seek_time);
+
+    return 0;
+}
+
+
+SSTF
+/*SSTF: In SSTF (Shortest Seek Time First), requests having shortest seek time are executed first. 
+So, the seek time of every request is calculated in advance in the queue and then they are scheduled 
+according to their calculated seek time. As a result, the request near the disk arm will get executed first.
+SSTF is certainly an improvement over FCFS as it decreases the average response time and increases the throughput of system.Let us understand this with the help of an example.
+
+Example:
+Suppose the order of request is- (82,170,43,140,24,16,190)
+And current position of Read/Write head is : 50
+So, total seek time:
+=(50-43)+(43-24)+(24-16)+(82-16)+(140-82)+(170-40)+(190-170)
+=208 
+Sample output
+
+Enter the number of Requests                                                                                            
+5                                                                                                                       
+Enter the Requests sequence                                                                                             
+34                                                                                                                      
+12                                                                                                                      
+56                                                                                                                      
+87                                                                                                                      
+32                                                                                                                      
+Enter initial head position                                                                                             
+46                                                                                                                      
+Total head movement is 129      */
+#include<stdio.h>
+#include<stdlib.h>
+#include<limits.h>
+
+int abs_diff(int a, int b) {
+    return abs(a - b);
+}
+
+int findClosestRequest(int requests[], int n, int head) {
+    int min_diff = INT_MAX;
+    int closest_index = -1;
+
+    for(int i = 0; i < n; i++) {
+        if (!requests[i])
+            continue;
+        int diff = abs_diff(head, requests[i]);
+        if(diff < min_diff) {
+            min_diff = diff;
+            closest_index = i;
+        }
+    }
+    return closest_index;
+}
+
+int main() {
+    int n, head, total_seek_time = 0;
+
+    printf("Enter the number of requests \n");
+    scanf("%d", &n);
+
+    int requests[n];
+    int completed_requests = 0;
+
+    printf("Enter the requests sequence \n");
+    for(int i = 0; i < n; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter initial head position\n");
+    scanf("%d", &head);
+
+    // SSTF algorithm
+    while(completed_requests < n) {
+        int closest_index = findClosestRequest(requests, n, head);
+        total_seek_time += abs_diff(head, requests[closest_index]);
+        head = requests[closest_index];
+        requests[closest_index] = 0; // Mark request as completed
+        completed_requests++;
+    }
+
+    printf("Total head movement is %d\n", total_seek_time);
+
+    return 0;
+}
+
+                            
+LRU
+#include<stdio.h>
+
+int main() {
+    int i, j, k, min, rs[25], m[10], count[10], flag[25], n, f, pf = 0, next = 1;
+
+    printf("Enter the length of the reference string -- ");
+    scanf("%d", &n);
+    printf("Enter the reference string -- ");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &rs[i]);
+        flag[i] = 0;
+    }
+
+    printf("Enter the number of frames -- ");
+    scanf("%d", &f);
+
+    for (i = 0; i < f; i++) {
+        count[i] = 0;
+        m[i] = -1;
+    }
+
+    printf("\nThe Page Replacement process is -- \n");
+
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < f; j++) {
+            if (m[j] == rs[i]) {
+                flag[i] = 1;
+                count[j] = next;
+                next++;
+            }
+        }
+        if (flag[i] == 0) {
+            int index = 0;
+            min = count[0];
+            for (j = 1; j < f; j++) {
+                if (count[j] < min) {
+                    min = count[j];
+                    index = j;
+                }
+            }
+            m[index] = rs[i];
+            count[index] = next;
+            next++;
+            pf++;
+        }
+
+        for (j = 0; j < f; j++) {
+            printf("%d\t", m[j]);
+        }
+        if (flag[i] == 0)
+            printf("PF No. -- %d", pf);
+        printf("\n");
+    }
+
+    printf("\nThe number of page faults using LRU are %d\n", pf);
+
+    return 0;
+}
+
+
+OPTIMAL
+#include <stdio.h>
+
+int findmax(int a[], int n); // Function declaration
+
+int main() {
+    int n, max, find, flag, i, j, m, k, t, s;
+    int seq[30], fr[5], pos[5];
+    int count = 1, pf = 0, p = 0;
+    float pfr;
+
+    printf("Enter maximum limit of the sequence: ");
+    scanf("%d", &max);
+    printf("\nEnter the sequence: ");
+    for (i = 0; i < max; i++)
+        scanf("%d", &seq[i]);
+    printf("\nEnter no. of frames: ");
+    scanf("%d", &n);
+    fr[0] = seq[0];
+    pf++;
+    printf("%d\t", fr[0]);
+    i = 1;
+    while (count < n) {
+        flag = 1;
+        p++;
+        for (j = 0; j < i; j++) {
+            if (seq[i] == seq[j])
+                flag = 0;
+        }
+        if (flag != 0) {
+            fr[count] = seq[i];
+            printf("%d\t", fr[count]);
+            count++;
+            pf++;
+        }
+        i++;
+    }
+    printf("\n");
+    for (i = p; i < max; i++) {
+        flag = 1;
+        for (j = 0; j < n; j++) {
+            if (seq[i] == fr[j])
+                flag = 0;
+        }
+        if (flag != 0) {
+            for (j = 0; j < n; j++) {
+                m = fr[j];
+                for (k = i; k < max; k++) {
+                    if (seq[k] == m) {
+                        pos[j] = k;
+                        break;
+                    } else
+                        pos[j] = 1;
+                }
+            }
+            for (k = 0; k < n; k++) {
+                if (pos[k] == 1)
+                    flag = 0;
+            }
+            if (flag != 0)
+                s = findmax(pos, n);
+            if (flag == 0) {
+                for (k = 0; k < n; k++) {
+                    if (pos[k] == 1) {
+                        s = k;
+                        break;
+                    }
+                }
+            }
+            fr[s] = seq[i];
+            for (k = 0; k < n; k++)
+                printf("%d\t", fr[k]);
+            pf++;
+            printf("\n");
+        }
+    }
+    pfr = (float)pf / (float)max;
+    printf("\nThe no. of page faults are %d", pf);
+    printf("\nPage fault rate %f", pfr);
+
+    return 0;
+}
+
+int findmax(int a[], int n) {
+    int max, i, k = 0;
+    max = a[0];
+    for (i = 0; i < n; i++) {
+        if (max < a[i]) {
+            max = a[i];
+            k = i;
+        }
+    }
+    return k;
+}
+
+
+
+FIFO
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_FRAMES 3 // Maximum number of frames
+
+int main() {
+    int reference_string[] = {0, 1, 2, 3, 2, 4, 5, 3, 4, 1}; // Reference string
+    int num_pages = sizeof(reference_string) / sizeof(reference_string[0]);
+    int frames[MAX_FRAMES]; // Array to hold the frames
+    int num_faults = 0; // Counter for page faults
+    int frame_index = 0; // Index to keep track of the oldest page in the frame
+
+    // Initialize frames to -1 indicating they are empty
+    for (int i = 0; i < MAX_FRAMES; i++) {
+        frames[i] = -1;
+    }
+
+    // Simulate FIFO page replacement algorithm
+    for (int i = 0; i < num_pages; i++) {
+        int page_number = reference_string[i];
+        int page_found = 0; // Flag to indicate if page is found in frames
+
+        // Check if the page is already in the frame
+        for (int j = 0; j < MAX_FRAMES; j++) {
+            if (frames[j] == page_number) {
+                page_found = 1;
+                break;
+            }
+        }
+
+        // If page is not found, replace the oldest page in the frame
+        if (!page_found) {
+            frames[frame_index] = page_number;
+            frame_index = (frame_index + 1) % MAX_FRAMES; // Update the index for the next oldest page
+            num_faults++;
+        }
+
+        // Print the current state of the frames
+        printf("Page %d -> Frames: ", page_number);
+        for (int j = 0; j < MAX_FRAMES; j++) {
+            if (frames[j] == -1) {
+                printf("- ");
+            } else {
+                printf("%d ", frames[j]);
+            }
+        }
+        printf("\n");
+    }
+
+    // Print the total number of page faults
+    printf("\nTotal Page Faults: %d\n", num_faults);
+
+    return 0;
+}
+
+
+
+
+
+                                 
